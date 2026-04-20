@@ -231,7 +231,7 @@ function trocar(tipo, el){
     document.getElementById("status").innerText = "aguardando...";
 }
 
-// LOGIN (AGORA IGUAL AO ORIGINAL)
+// LOGIN (CORRIGIDO COM FREQUÊNCIA REAL)
 function limparLogin(){
     let texto = document.getElementById("entradaLogin").value;
     let status = document.getElementById("status");
@@ -245,23 +245,30 @@ function limparLogin(){
     status.innerText = "processando...";
 
     setTimeout(()=>{
-        let unicos = [...new Set(encontrados)];
-        let removidos = encontrados.length - unicos.length;
+
+        let mapa = {};
+        encontrados.forEach(l => {
+            mapa[l] = (mapa[l] || 0) + 1;
+        });
+
+        let unicos = Object.keys(mapa);
+
+        let totalDuplicados = 0;
+        for (let key in mapa) {
+            if (mapa[key] > 1) {
+                totalDuplicados += mapa[key] - 1;
+            }
+        }
 
         document.getElementById("resultadoLogin").innerText = unicos.join("\n");
         document.getElementById("contadorLogin").innerText = encontrados.length;
 
-        let porcentagemRemovidos = encontrados.length > 0 
-            ? ((removidos / encontrados.length) * 100).toFixed(1) 
-            : 0;
-
-        let porcentagemUnicos = encontrados.length > 0 
-            ? ((unicos.length / encontrados.length) * 100).toFixed(1) 
-            : 0;
+        let pU = encontrados.length ? ((unicos.length / encontrados.length) * 100).toFixed(1) : 0;
+        let pD = encontrados.length ? ((totalDuplicados / encontrados.length) * 100).toFixed(1) : 0;
 
         document.getElementById("totalLogin").innerText = encontrados.length;
-        document.getElementById("dupesLogin").innerText = `${removidos} (${porcentagemRemovidos}%)`;
-        document.getElementById("unicosLogin").innerText = `${unicos.length} (${porcentagemUnicos}%)`;
+        document.getElementById("unicosLogin").innerText = `${unicos.length} (${pU}%)`;
+        document.getElementById("dupesLogin").innerText = `${totalDuplicados} (${pD}%)`;
 
         status.innerHTML = "finalizado ✔️";
     },300);
@@ -297,7 +304,7 @@ function limparCpf(){
     },300);
 }
 
-// copiar (igual original)
+// copiar
 function copiar(tipo){
     let texto = document.getElementById(tipo==="login"?"resultadoLogin":"resultadoCpf").innerText;
 
