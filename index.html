@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Limpador ULTRA</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #050000;
+    color: white;
+}
+
+.container {
+    max-width: 420px;
+    margin: 10px auto;
+    padding: 10px;
+}
+
+.card {
+    background: #120000;
+    border-radius: 20px;
+    padding: 15px;
+    border: 1px solid red;
+    box-shadow: 0 0 30px rgba(255,0,0,0.7);
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.tab {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    border-radius: 12px;
+    background: #1a0000;
+    cursor: pointer;
+}
+
+.tab.active {
+    background: linear-gradient(45deg, #ff0000, #ff4d4d);
+}
+
+h1 {
+    text-align: center;
+    color: #ff3b3b;
+    font-size: 18px;
+}
+
+h1::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 10px red;
+}
+
+.status {
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+textarea {
+    width: 100%;
+    height: 110px;
+    background: #000;
+    color: #fff;
+    border: 1px solid red;
+    border-radius: 12px;
+    padding: 10px;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
+.file {
+    margin-top: 10px;
+    background: rgba(255,0,0,0.1);
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.botoes {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+button {
+    flex: 1;
+    background: linear-gradient(45deg, #ff0000, #ff4d4d);
+    border: none;
+    padding: 10px;
+    border-radius: 12px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 0 15px red;
+}
+
+.info {
+    margin-top: 10px;
+}
+
+.stats {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #bbb;
+}
+
+.resultado {
+    margin-top: 10px;
+    background: #000;
+    padding: 12px;
+    border-radius: 12px;
+    min-height: 90px;
+    font-size: 12px;
+    border: 1px solid red;
+    white-space: pre-wrap;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<div class="tabs">
+<div class="tab active" onclick="trocar('login', this)">Login</div>
+<div class="tab" onclick="trocar('cpf', this)">CPF</div>
+</div>
+
+<h1>Limpador ULTRA</h1>
+<div class="status" id="status">aguardando...</div>
+
+<!-- LOGIN -->
+<div id="loginBox">
+
+<textarea id="entradaLogin" placeholder="Cole aqui..."></textarea>
+
+<div class="file">
+<input type="file" id="arquivoLogin" accept=".txt">
+</div>
+
+<div class="botoes">
+<button onclick="limparLogin()">Limpar</button>
+<button onclick="copiar('login')">Copiar</button>
+<button onclick="baixar('login')">Baixar</button>
+</div>
+
+<div class="info">
+Total encontrado: <span id="contadorLogin">0</span>
+</div>
+
+<div class="stats">
+Total: <span id="totalLogin">0</span> | 
+Únicos: <span id="unicosLogin">0</span> | 
+Duplicados Removidos: <span id="dupesLogin">0</span>
+</div>
+
+<div class="resultado" id="resultadoLogin"></div>
+
+</div>
+
+<!-- CPF -->
+<div id="cpfBox" class="hidden">
+
+<textarea id="entradaCpf" placeholder="Cole aqui..."></textarea>
+
+<div class="file">
+<input type="file" id="arquivoCpf" accept=".txt">
+</div>
+
+<div class="botoes">
+<button onclick="limparCpf()">Processar</button>
+<button onclick="copiar('cpf')">Copiar</button>
+<button onclick="baixar('cpf')">Baixar</button>
+</div>
+
+<div class="info">
+Total encontrado: <span id="contadorCpf">0</span>
+</div>
+
+<div class="stats">
+Total: <span id="totalCpf">0</span> | 
+Únicos: <span id="unicosCpf">0</span> | 
+Duplicados Removidos: <span id="dupesCpf">0</span>
+</div>
+
+<div class="resultado" id="resultadoCpf"></div>
+
+</div>
+
+<div class="footer">
+Feito por @wgxws
+</div>
+
+</div>
+</div>
+
+<script>
+
+function trocar(tipo, el){
+    document.getElementById("loginBox").classList.toggle("hidden", tipo !== "login");
+    document.getElementById("cpfBox").classList.toggle("hidden", tipo !== "cpf");
+
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+
+    document.getElementById("status").innerText = "aguardando...";
+}
+
+// LOGIN (AGORA IGUAL AO ORIGINAL)
+function limparLogin(){
+    let texto = document.getElementById("entradaLogin").value;
+    let status = document.getElementById("status");
+
+    let regex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}|\d{11}|\d{3}\.\d{3}\.\d{3}-\d{2}):[^\s:]+/g;
+
+    let encontrados = (texto.match(regex) || [])
+        .map(l => l.trim().split(/[|\s]/)[0])
+        .filter(l => l.includes(":") && !l.startsWith("http"));
+
+    status.innerText = "processando...";
+
+    setTimeout(()=>{
+        let unicos = [...new Set(encontrados)];
+        let removidos = encontrados.length - unicos.length;
+
+        document.getElementById("resultadoLogin").innerText = unicos.join("\n");
+        document.getElementById("contadorLogin").innerText = encontrados.length;
+
+        let porcentagemRemovidos = encontrados.length > 0 
+            ? ((removidos / encontrados.length) * 100).toFixed(1) 
+            : 0;
+
+        let porcentagemUnicos = encontrados.length > 0 
+            ? ((unicos.length / encontrados.length) * 100).toFixed(1) 
+            : 0;
+
+        document.getElementById("totalLogin").innerText = encontrados.length;
+        document.getElementById("dupesLogin").innerText = `${removidos} (${porcentagemRemovidos}%)`;
+        document.getElementById("unicosLogin").innerText = `${unicos.length} (${porcentagemUnicos}%)`;
+
+        status.innerHTML = "finalizado ✔️";
+    },300);
+}
+
+// CPF
+function limparCpf(){
+    let texto = document.getElementById("entradaCpf").value;
+    let status = document.getElementById("status");
+
+    let regex = /\b\d{3}\.?\d{3}\.?\d{3}[-.]?\d{2}\b/g;
+    let encontrados = texto.match(regex) || [];
+
+    encontrados = encontrados.map(c => c.replace(/\D/g,""));
+
+    status.innerText = "processando...";
+
+    setTimeout(()=>{
+        let unicos = [...new Set(encontrados)];
+        let removidos = encontrados.length - unicos.length;
+
+        document.getElementById("resultadoCpf").innerText = unicos.join("\n");
+        document.getElementById("contadorCpf").innerText = encontrados.length;
+
+        let pU = encontrados.length ? ((unicos.length/encontrados.length)*100).toFixed(1) : 0;
+        let pR = encontrados.length ? ((removidos/encontrados.length)*100).toFixed(1) : 0;
+
+        document.getElementById("totalCpf").innerText = encontrados.length;
+        document.getElementById("unicosCpf").innerText = `${unicos.length} (${pU}%)`;
+        document.getElementById("dupesCpf").innerText = `${removidos} (${pR}%)`;
+
+        status.innerHTML = "finalizado ✔️";
+    },300);
+}
+
+// copiar (igual original)
+function copiar(tipo){
+    let texto = document.getElementById(tipo==="login"?"resultadoLogin":"resultadoCpf").innerText;
+
+    let temp = document.createElement("textarea");
+    temp.value = texto;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    document.body.removeChild(temp);
+
+    alert("Copiado!");
+}
+
+// baixar
+function baixar(tipo){
+    let texto = document.getElementById(tipo==="login"?"resultadoLogin":"resultadoCpf").innerText;
+    let blob = new Blob([texto], {type:"text/plain"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = tipo+".txt";
+    a.click();
+}
+
+// upload LOGIN
+document.getElementById("arquivoLogin").addEventListener("change", function(e){
+    let file = e.target.files[0];
+    if(!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(e){
+        document.getElementById("entradaLogin").value = e.target.result;
+    }
+    reader.readAsText(file, "UTF-8");
+});
+
+// upload CPF
+document.getElementById("arquivoCpf").addEventListener("change", function(e){
+    let file = e.target.files[0];
+    if(!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(e){
+        document.getElementById("entradaCpf").value = e.target.result;
+    }
+    reader.readAsText(file, "UTF-8");
+});
+
+</script>
+
+</body>
+</html>
